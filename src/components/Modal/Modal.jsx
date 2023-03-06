@@ -1,47 +1,65 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
 import {
-  Button,
   Modal,
-  Overlay,
-  Content,
-  Title,
+  Wrapper,
+  Text,
+  ButtonWrapper,
   CloseButton,
-  ButtonBox,
-  Confirm,
+  Backdrop,
 } from './Modal.styled';
-
 import { FiX } from 'react-icons/fi';
+import { BtnDismiss, BtnLogOut } from 'components/Button/Button';
 
-export default function LeaveModal({ title }) {
-  const [modal, setModal] = useState(false);
+const modalRoot = document.getElementById('modal-root');
+const body = document.querySelector('body');
 
-  const toggleModal = () => {
-    setModal(!modal);
+export const ModalWindow = ({ children, closeModal, dispatch }) => {
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscapeClose);
+    return () => {
+      window.removeEventListener('keydown', handleEscapeClose);
+      body.classList.toggle('no-scroll');
+    };
+  });
+
+  const handleEscapeClose = event => {
+    if (event.code === 'Escape') {
+      closeModal();
+    }
   };
 
-  return (
-    <>
-      <Confirm onClick={toggleModal}>Leave</Confirm>
-      {modal && (
-        <Modal>
-          <Overlay onClick={toggleModal}>
-            <Content>
-              <Title>{title}</Title>
-              <ButtonBox>
-                <Button>Yes</Button>
-                <Button
-                  style={{ backgroundColor: '#ffffff', color: 'currentcolor' }}
-                >
-                  No
-                </Button>
-              </ButtonBox>
-              <CloseButton onClick={toggleModal}>
-                <FiX size={20} />
-              </CloseButton>
-            </Content>
-          </Overlay>
-        </Modal>
-      )}
-    </>
+  const handleBackdropClose = event => {
+    if (event.target === event.currentTarget) {
+      closeModal();
+    }
+  };
+
+  return createPortal(
+    <Backdrop className="modal-backdrop" onClick={handleBackdropClose}>
+      <Modal>
+        <CloseButton onClick={closeModal}>
+          <FiX size={20} />
+        </CloseButton>
+
+        <Wrapper>
+          <Text>{children}</Text>
+          <ButtonWrapper>
+            <BtnLogOut
+              type="button"
+              dispatch={dispatch}
+              closeModal={closeModal}
+            >
+              Yes
+            </BtnLogOut>
+            <BtnDismiss type="button" closeModal={closeModal}>
+              No
+            </BtnDismiss>
+          </ButtonWrapper>
+        </Wrapper>
+      </Modal>
+    </Backdrop>,
+    modalRoot
   );
-}
+};

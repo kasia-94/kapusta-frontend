@@ -1,3 +1,4 @@
+import { useMedia } from 'hooks/useMedia';
 import {
   BarChart,
   Bar,
@@ -9,6 +10,8 @@ import {
   Text,
 } from 'recharts';
 import COLORS from 'variables/colors/colors';
+import { selectDescriptionsByCategory } from 'redux/transactions/transactionsSelectors';
+import { useSelector } from 'react-redux';
 
 const CustomizedLabel = ({ x, y, _, value }) => {
   return (
@@ -44,15 +47,23 @@ const CustomizedTickLabel = ({ x, y, payload }) => {
 };
 
 export default function GraphicBar({ transaction }) {
+
+  const { isDesktop } = useMedia();
+  const desriptions = useSelector(selectDescriptionsByCategory);
+
+  const padding = isDesktop ? 77 : 5;
+  const margin = isDesktop ? 150 : 50;
+ 
+  if (transaction.length === 0) { return('No data to display') };
   return (
     <ResponsiveContainer>
       <BarChart
-        data={transaction}
+        data={desriptions}
         stackOffset={'expand'}
         margin={{
           top: 50,
-          right: 150,
-          left: 150,
+          right: margin,
+          left: margin,
           bottom: 5,
         }}
         barGap={25}
@@ -60,7 +71,7 @@ export default function GraphicBar({ transaction }) {
         <CartesianGrid vertical={false} stroke={COLORS.bgTableTitle} />
         <XAxis
           dataKey="name"
-          padding={{ left: 77, right: 77 }}
+          padding={{ left: padding, right: padding }}
           axisLine={false}
           tickLine={false}
           tick={<CustomizedTickLabel />}
@@ -75,8 +86,11 @@ export default function GraphicBar({ transaction }) {
           label={<CustomizedLabel />}
           barSize={35}
         >
-          {transaction.map((_, index) => (
-            <Cell fill={index % 3 ? COLORS.barColor : COLORS.activeColor} />
+          {desriptions.map((element, index) => (
+            <Cell
+              fill={index % 3 ? COLORS.barColor : COLORS.activeColor}
+              key={element.id}
+            />
           ))}
         </Bar>
       </BarChart>

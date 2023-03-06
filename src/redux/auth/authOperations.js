@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { toast } from 'react-hot-toast';
+import Notiflix from 'notiflix';
 
 axios.defaults.baseURL = '';
 
 //add token to axios
 function setAuthToken(token) {
-  axios.defaults.headers.common['Authorization'] = token;
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
 //remove token from axios
@@ -21,9 +21,16 @@ export const register = createAsyncThunk(
     try {
       const responce = await axios.post('/users/register', credentials);
       // After successful registration, add the token to the HTTP header
-      setAuthToken(responce.data.token);
+      // setAuthToken(responce.data.token);
+      Notiflix.Notify.success('Welcome to Kapu$ta! Please verify your email');
       return responce.data;
     } catch (error) {
+      const errorMes = error.response.data.message;
+      if (errorMes === 'Email in use') {
+        return Notiflix.Notify.failure('This email is already used');
+      }
+
+      Notiflix.Notify.failure(error.message);
       return thunkAPI.rejectWithValue(error.message);
     }
   }
@@ -35,11 +42,14 @@ export const logIn = createAsyncThunk(
   async (credentials, thunkAPI) => {
     try {
       const responce = await axios.post('/users/login', credentials);
+
+      console.log(responce);
       // After successful login, add the token to the HTTP header
-      setAuthToken(responce.data.token);
+      setAuthToken(responce.data.accessToken);
+      Notiflix.Notify.success('Welcome to Kapu$ta!');
       return responce.data;
     } catch (error) {
-      toast.error('Check e-mail or password');
+      Notiflix.Notify.failure('Check e-mail or password');
       return thunkAPI.rejectWithValue(error.message);
     }
   }
@@ -50,7 +60,7 @@ export const logOut = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
   try {
     const responce = await axios.post('/users/logout');
     clearAuthToken();
-
+    Notiflix.Notify.info('Goodbye!');
     return responce.data;
   } catch (e) {
     return thunkAPI.rejectWithValue(e.message);
@@ -63,7 +73,7 @@ export const refreshUser = createAsyncThunk(
   async (_, thunkAPI) => {
     // Reading the token from the state via getState()
     const state = thunkAPI.getState();
-    const persistedToken = state.auth.token;
+    const persistedToken = state.auth.accessToken;
 
     if (persistedToken === null) {
       // If there is no token, exit without performing any request
@@ -72,11 +82,39 @@ export const refreshUser = createAsyncThunk(
 
     try {
       // If there is a token, add it to the HTTP header and perform the request
+
       setAuthToken(persistedToken);
       const responce = await axios.get('/users/current');
       return responce.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+// update user balance
+export const updateBalance = createAsyncThunk(
+  'user/updateBalance',
+  async (balance, thunkAPI) => {
+    try {
+      const { data } = await axios.patch('/users/balance', balance);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const googleUser = createAsyncThunk(
+  'auth/google',
+  async ({ accessToken }, thunkAPI) => {
+    try {
+      setAuthToken(accessToken);
+      const { data } = await axios.get('/users/current');
+
+      return data;
+    } catch (e) {
+      return thunkAPI.rejectWithValue(e.message);
     }
   }
 );

@@ -1,197 +1,53 @@
 import { BsTrash } from 'react-icons/bs';
-import { TransactionItem } from './TransactionListMobile.styled';
+import {
+  TransactionBox,
+  TransactionDeleteBtn,
+  TransactionDescription,
+  TransactionInfo,
+  TransactionInfoBox,
+  TransactionItem,
+  TransactionSum,
+} from './TransactionListMobile.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectTransactionsByType } from 'redux/transactions/transactionsSelectors';
+import Moment from 'react-moment';
+import { removeTransaction } from 'redux/transactions/transactionsOperations';
 
-const monthTransaction = [
-  {
-    id: 1,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 12,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 13321,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 14,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 41,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 13,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 133,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 132,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 1432423,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: 142,
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-  {
-    id: Math.random(),
-    date: '21.09.2019',
-    description: 'salary',
-    category: 'car',
-    sum: 2000,
-  },
-];
+export default function TransactionListMobile({ openTrForm }) {
+  const filteredTransactions = useSelector(selectTransactionsByType);
+  const dispatch = useDispatch();
 
-export default function TransactionListMobile() {
   return (
     <ul>
-      {monthTransaction.map(({ id, date, description, category, sum }) => {
-        return (
-          <TransactionItem key={id}>
-            <div>
-              <p>{description}</p>
-              <p>{date}</p>
-              <p>{category}</p>
-            </div>
-            <div>
-              <p>{sum}</p>
-              <button>
-                <BsTrash />
-              </button>
-            </div>
-          </TransactionItem>
-        );
-      })}
+      {filteredTransactions.map(
+        ({ _id, date, description, category, sum, type }) => {
+          console.log(type === 'expenses');
+
+          return (
+            <TransactionItem key={_id}>
+              <div>
+                <TransactionDescription>{description}</TransactionDescription>
+                <TransactionInfoBox>
+                  <TransactionInfo>
+                    <Moment format="DD.MM.YYYY">{date}</Moment>
+                  </TransactionInfo>
+                  <TransactionInfo>{category}</TransactionInfo>
+                </TransactionInfoBox>
+              </div>
+              <TransactionBox>
+                <TransactionSum isExpenses={type === 'expenses'}>
+                  {sum}
+                </TransactionSum>
+                <TransactionDeleteBtn
+                  onClick={() => dispatch(removeTransaction(_id))}
+                >
+                  <BsTrash width={15} height={18} />
+                </TransactionDeleteBtn>
+              </TransactionBox>
+            </TransactionItem>
+          );
+        }
+      )}
     </ul>
   );
 }
