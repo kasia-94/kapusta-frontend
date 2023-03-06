@@ -6,7 +6,6 @@ import { fadeInLeft, fadeInRight } from 'react-animations';
 const animation2 = keyframes`${fadeInLeft}`;
 const animation3 = keyframes`${fadeInRight}`;
 
-export const FormBox = styled.form`
 export const FormBox = styled.div`
   display: flex;
   flex-direction: column;
